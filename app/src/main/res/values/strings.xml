@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">NovelReader</string>
+
+    <string name="title">第-章</string>
+    <string name="chapter_previous">上一章</string>
+    <string name="chapter_next">下一张</string>
+    <string name="chapter_list">目录</string>
+    <string name="font_size">A</string>
+    <string name="font_size_up">+</string>
+    <string name="font_size_down">-</string>
+    <string name="default_str">-_-</string>
+    <string name="theme">日间</string>
+    <string name="theme_night">夜间</string>
+    <string name="settings">设置</string>
+</resources>
