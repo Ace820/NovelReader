@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -20,8 +21,8 @@ _id             |Name     |FilPath    |ChapterIndex     |ChapterPercentage
 文件路径hash     |真实书名  |文件路径    |当前章节索引       |当前章节内容百分比
 -----------------------------------------------------------------------------
 =================================================================================
-table [_id]:
-书籍的真实内容信息,_id作为表名，章节索引作为主键
+table book_[_id]:
+书籍的真实内容信息,book_[_id]作为表名，章节索引作为主键
 ------------------------------------------------------
 chapter_index      |chapter_title     |chapter_data
 章节索引           |章节标题          |章节内容
@@ -32,9 +33,11 @@ public class DatabaseFunc extends SQLiteOpenHelper {
     private final static String DATABASENAME = "myNovel";
     private final static int DATABASEVERSION = 1;
     SQLiteDatabase novelDB;
+    Context context;
 
     public DatabaseFunc(Context contexts) {
         super(contexts,DATABASENAME,null,DATABASEVERSION);
+        context = contexts;
         novelDB = getWritableDatabase();
     }
 
@@ -58,29 +61,73 @@ public class DatabaseFunc extends SQLiteOpenHelper {
         return cursor.getString(0);
     }
 
-    public void addBook(String bookPath) throws IOException {
+    public void addBook(String bookPath) throws Exception {
+        Log.d(this.toString(),"open book " + bookPath);
         if (bookPath == null)
             return;
-        String _id = path2Sha1(bookPath);
+        if (!bookPath.toLowerCase().endsWith(".txt")) {
+            Log.d(this.toString(),"should be end with .txt!");
+            return;
+        }
+        String _id = path2Sha1(bookPath).toLowerCase();
+        Log.d(this.toString(),"_id is " + _id);
         if (_id != null) {
-            String sql = "create table " + _id +
-                    " (chapter_index int primary key," +
+            String sql = "create table if not exists 'book_" + _id +
+                    "' (chapter_index int primary key," +
                     " chapter_title varchar(50)," +
                     " chapter_data text)";
             novelDB.execSQL(sql);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("_id",_id);
+            contentValues.put("Name",TxtParser.getRealName(bookPath));
+            contentValues.put("FilePath",bookPath);
+            contentValues.put("ChapterIndex","0");
+            novelDB.insert("book_list",null,contentValues);
         }
-        ArrayList chapterList = TxtParser.initChapter(bookPath);
-        for (int index = 0; index <chapterList.size(); index++ ) {
-            ContentValues contentValues = (ContentValues) chapterList.get(index);
-            novelDB.insert(_id,null,contentValues);
-        }
+        Log.d(this.toString(),"get txt data");
+//        ArrayList chapterList = TxtParser.initChapter(bookPath,_id);
+        TxtParser.initChapter(bookPath,novelDB,"book_" + _id);
+        Log.d(this.toString(),"get txt data success");
+//        for (int index = 0; index <chapterList.size(); index++ ) {
+//            ContentValues contentValues = (ContentValues) chapterList.get(index);
+//            Log.d(this.toString(),"get txt chapter " + contentValues.getAsString("chapter_title"));
+//            novelDB.insert(_id,null,contentValues);
+//        }
 
     }
+    public static void insert(SQLiteDatabase dataBase,String table,ContentValues contentValues) {
+        dataBase.insert(table,null,contentValues);
+    }
 
+    public ArrayList<String> getBookList() {
+        String sql = "select _id from book_list";
+        ArrayList<String> bookList = new ArrayList<>();
+        Cursor cursor = novelDB.rawQuery(sql,null);
+        cursor.moveToFirst();
+        do {
+            if(cursor.getCount() == 0) break;
+            String result = cursor.getString(cursor.getColumnIndex("_id"));
+            if (result!=null)
+            bookList.add(result);
+        } while (cursor.moveToNext());
+        cursor.close();
+
+        return bookList;
+    }
+
+    public String getBookName(String id) {
+        String sql = "select Name from book_list where _id is '" + id + "'";
+        Cursor cursor = novelDB.rawQuery(sql,null);
+        cursor.moveToFirst();
+        return cursor.getString(0);
+
+    }
     private boolean isBookExist(String bookPath) {
         String sql = "select * from table book_list where FilePath is '" + bookPath + "'";
         Cursor cursor = novelDB.rawQuery(sql,null);
-        return (cursor.getCount() != 0);
+        boolean exist = (cursor.getCount() != 0);
+        cursor.close();
+        return exist;
     }
 
     public static String path2Sha1(String bookPath) {
@@ -109,5 +156,9 @@ public class DatabaseFunc extends SQLiteOpenHelper {
 
         // 字符数组组合成字符串返回
         return null;
+    }
+
+    public void close() {
+        novelDB.close();
     }
 }

@@ -36,21 +36,26 @@ public class ConfigFunc {
 
     public void setFontSize(int newFontSize) {
         fontSize = newFontSize;
+        saveConfig();
     }
 
     public void setFontColor(int newColor) {
         fontColor = newColor;
+        saveConfig();
     }
 
     public void setBackgroundColor(int newColor) {
         backgroundColor = newColor;
+        saveConfig();
     }
 
     public void setAutoLink(boolean newAutoLink) {
         autoLink = newAutoLink;
+        saveConfig();
     }
     public void setCurrentBook(String newBook) {
         currentBook = newBook;
+        saveConfig();
     }
 
     public void loadConfig() {

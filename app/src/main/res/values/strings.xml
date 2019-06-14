@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">NovelReader</string>
 
+    <string name="add_book">添加</string>
+
     <string name="title">第-章</string>
     <string name="chapter_previous">上一章</string>
     <string name="chapter_next">下一张</string>

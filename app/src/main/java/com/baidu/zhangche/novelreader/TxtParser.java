@@ -1,8 +1,12 @@
 package com.baidu.zhangche.novelreader;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +16,9 @@ import java.util.regex.Pattern;
 
 public class TxtParser {
     int novelIndex = 0;
-    public TxtParser(String Name,String FilePath) {
-
+    static Context mContext;
+    public TxtParser(Context context) {
+mContext = context;
     }
 
     public int getChapterIndex() {
@@ -29,30 +34,62 @@ public class TxtParser {
         novelIndex = index;
     }
 
-    public static ArrayList initChapter(String novelPath) throws IOException {
-        ArrayList<ContentValues> chapterList = new ArrayList<>();
+    public static void initChapter(String novelPath, SQLiteDatabase dateBase,String table) throws IOException {
+//        ArrayList<ContentValues> chapterList = new ArrayList<>();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(novelPath));
         String line;
         ContentValues contentValue = new ContentValues();
         String chapter = "";
+//        DatabaseFunc databaseFunc = new DatabaseFunc(mContext);
+        int index = 0;
+        contentValue.put("chapter_title","序章");
         while ((line = bufferedReader.readLine()) != null) {
             if (isTitle(line)) {
+                contentValue.put("chapter_index",index);
                 contentValue.put("chapter_data",chapter);
-                chapterList.add(contentValue);
+                Log.d(TxtParser.class.toString(),"get title " + contentValue.getAsString("chapter_title"));
+//                chapterList.add(contentValue);
+                DatabaseFunc.insert(dateBase,table,contentValue);
                 chapter = "";
-                contentValue.put("chapter_index",chapterList.size());
-                contentValue.put("chapter_title",line);
+                index ++;
+                contentValue.put("chapter_title",line.trim());
             }
-            //Add last chapter
-            contentValue.put("chapter_data",chapter);
-            chapterList.add(contentValue);
             chapter += "\n" + line;
         }
-        return chapterList;
+        //Add last chapter
+        contentValue.put("chapter_index",index);
+        contentValue.put("chapter_data",chapter);
+        DatabaseFunc.insert(dateBase,table,contentValue);
+//        chapterList.add(contentValue);
+//        databaseFunc.insert(dateBase,table,contentValue);
+//        return chapterList;
     }
 
-    public String getRealName(String novelPath) {
-        return null;
+    public static String getRealName(String novelPath) {
+        File file = new File(novelPath);
+        String name = file.getName().toLowerCase().replaceAll(".txt","");
+        if(name.matches("[0-9]+")) {
+
+            try {
+                BufferedReader bufferedReader = new BufferedReader(new FileReader(novelPath));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    if(line.length() < 1)
+                        continue;
+                    if(line.length() > 10)
+                        continue;
+                    if (line.matches("[- ]+"))
+                        continue;
+                    if(isTitle(line))
+                        break;
+                    name = line;
+                    break;
+                }
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return name;
     }
 /*章节名应有属性：
 * 1.不应大于30字符或者小于1字符
@@ -65,10 +102,20 @@ public class TxtParser {
     private static boolean isTitle(String line) {
         if (line.length() > 30) return false;
         if (line.length() < 1) return false;
-        String temp = line.replaceAll("\\s*","");
+        String temp = line.replaceAll("\\s"," ");
+        temp = temp.trim();
         if (temp.charAt(0) == '"') return false;
         if (temp.charAt(0) == '”') return false;
-        String[] patternKey = {"^第[0-9一二三四五六七八九零]+","^[0-9一二三四五六七八九零]+"};
+        if (temp.endsWith("。")) return false;
+        if (temp.endsWith("?")) return false;
+        if (temp.endsWith("!")) return false;
+        if (temp.endsWith("\"")) return false;
+        String[] patternKey = {
+                "^第[0-9一二三四五六七八九零]+[章节回]? ",
+                "^第[0-9一二三四五六七八九零]+ ",
+                "^[0-9一二三四五六七八九零]+[章节回]? ",
+                "^[0-9一二三四五六七八九零]+ ",
+        };
         Pattern[] patterns = new Pattern[patternKey.length];
         for(int i =0; i< patternKey.length; i++) {
             patterns[i] = Pattern.compile(patternKey[i]);
@@ -76,7 +123,10 @@ public class TxtParser {
 
         for (Pattern pattern:patterns) {
             Matcher matcher = pattern.matcher(temp);
-            if(matcher.find()) return true;
+            if(matcher.find()) {
+                Log.d("zhangche","title ? is " + temp);
+                return true;
+            }
         }
         return false;
     }
