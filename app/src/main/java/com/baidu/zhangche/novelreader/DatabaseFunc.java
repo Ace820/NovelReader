@@ -17,8 +17,8 @@ import java.util.Map;
 table book_list:
 所有书籍的基础信息列表，使用文件路径的hash作为主键
 -----------------------------------------------------------------------------
-_id             |Name     |FilPath    |ChapterIndex     |ChapterPercentage
-文件路径hash     |真实书名  |文件路径    |当前章节索引       |当前章节内容百分比
+_id             |Name     |FilPath    |ChapterIndex     |ChapterLine
+文件路径hash     |真实书名  |文件路径    |当前章节索引       |当前章节内容行
 -----------------------------------------------------------------------------
 =================================================================================
 table book_[_id]:
@@ -47,7 +47,8 @@ public class DatabaseFunc extends SQLiteOpenHelper {
                     + "(_id VARCHAR(40) PRIMARY KEY,"
                     + " Name VARCHAR(30)  NOT NULL,"
                     + " FilePath VARCHAR(100) NOT NULL,"
-                    + " ChapterIndex int)";
+                    + " ChapterIndex int,"
+                    + " ChapterLine int)";
             db.execSQL(sql);
     }
 
@@ -56,9 +57,23 @@ public class DatabaseFunc extends SQLiteOpenHelper {
     }
 
     public String getChapterData(String book,String index) {
-        String sql = "select chapter_data form table " + book + "where chapter_index is " + index;
+        String sql = "select chapter_data form '" + book + "' where chapter_index is " + index;
         Cursor cursor = novelDB.rawQuery(sql,null);
+        cursor.moveToFirst();
         return cursor.getString(0);
+    }
+    public int getLastChapterIndex(String bookId) {
+        String sql = "select chapterIndex form book_list where _id is '" + bookId + "'";
+        Cursor cursor = novelDB.rawQuery(sql,null);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
+    }
+
+    public int getLastChapterIine(String bookId) {
+        String sql = "select chapterLine form book_list where _id is '" + bookId + "'";
+        Cursor cursor = novelDB.rawQuery(sql,null);
+        cursor.moveToFirst();
+        return cursor.getInt(0);
     }
 
     public void addBook(String bookPath) throws Exception {

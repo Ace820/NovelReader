@@ -144,7 +144,7 @@ public class BookSheetActivity extends AppCompatActivity {
             config.setCurrentBook(bookId);
 
             Intent intent = new Intent();
-            intent.setClass(BookSheetActivity.this,FullscreenActivity.class);
+            intent.setClass(BookSheetActivity.this,BookReaderActivity.class);
             startActivity(intent);
 
         }

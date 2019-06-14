@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#70dbdb"
+    tools:context=".BookReaderActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="12sp"
+        android:id="@+id/text_title_area"
+        android:text="@string/title"/>
+
+    <TextView
+        android:id="@+id/text_read_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_title_area"
+        android:gravity="center"
+        android:keepScreenOn="true"
+        android:text="@string/default_str"
+
+        android:textColor="#ffffff"
+        android:textSize="50sp"
+        android:textStyle="bold" />
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+    <FrameLayout
+        android:id="@+id/control_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/chapter_bar"
+                style="?metaButtonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="@color/setting_bar"
+                android:measureWithLargestChild="false"
+                app:layout_constraintBottom_toTopOf="@+id/settings_bar"
+                tools:ignore="UselessParent">
+
+                <Button
+                    android:id="@+id/chapter_previous"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:background="@color/setting_bar"
+                    android:text="@string/chapter_previous" />
+
+                <TextView
+                    android:id="@+id/chapter_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="10"
+                    android:gravity="center"
+                    android:text="@string/default_str"
+                    app:layout_constraintLeft_toRightOf="@+id/chapter_previous" />
+
+                <Button
+                    android:id="@+id/chapter_next"
+                    android:layout_width="10sp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:background="@color/setting_bar"
+                    android:text="@string/chapter_next" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settings_bar"
+                style="?metaButtonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@color/setting_bar"
+                tools:ignore="UselessParent">
+
+                <Button
+                    android:id="@+id/chapter_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/setting_bar"
+                    android:text="@string/chapter_list" />
+
+                <Button
+                    android:id="@+id/font_size_up"
+                    android:layout_width="15dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:background="@color/setting_bar"
+                    android:text="@string/font_size_up" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18dp"
+                    android:layout_weight="2"
+                    android:text="@string/font_size" />
+
+                <Button
+                    android:id="@+id/font_size_down"
+                    android:layout_width="15dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="5"
+                    android:background="@color/setting_bar"
+                    android:text="@string/font_size_down" />
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/setting_bar"
+                    android:layout_weight="1"
+                    android:text="@string/theme"
+                    android:id="@+id/theme"/>
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/setting_bar"
+                    android:layout_weight="2"
+                    android:text="@string/settings"
+                    android:id="@+id/settings"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
